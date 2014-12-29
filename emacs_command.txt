@@ -1,0 +1,110 @@
+############################################
+#  emacs_command       29 December 2014    #
+#	                    --Jun Lee      #
+############################################
+
+<-------------MOVE----------->
+C-v //move forward one screenful
+M-v //move backard one screenful
+C-l //clear screen and redisplay all the text,moving the cursor to the center of screen
+
+C-f //move forward a character
+C-b //move backward a character
+
+M-f //move forward a word
+M-b //move backword a word
+
+C-p //move to previous line
+C-n //move to next line
+
+C-a //move to the beginning of line
+C-e //move to the end of line
+
+M-a //move to beginning of sentence
+M-e //move to end of sentence
+
+M-> //move to end of file
+M-< //move to beginning of file
+
+<--------------WINDOWS-------------->
+C-u //let emacs accept a numeric argument,this serves as a repeat-count.like C-u 8 C-p move previous 8 line 
+
+C-g //stop a command safely
+
+C-x //use disabled command.like C-x C-l
+
+C-x 1 //One window,kill all other windows
+
+C-z //exit emacs temporarily,'suspends' emacs
+
+<---------------ADD AND DELETE----------->
+<Delback> //delete the character before cursor
+C-d //as same as <delete>,delete the character after cursor
+
+M-<Delback> //kill the word before cursor
+M-d //kill the word after cursor
+
+C-k //kill from the cursor posision to end of line
+M-k //kill to the end of the current sentence
+
+[different between kill and delete] kill can reinserted but delete can not
+
+C-y //it reinserted the last killed text at the current position
+M-y //it reinserted previous killed text at the current position,if you M-y enough time you can come back to the starting point
+
+<-----------------UNDO----------->
+C-x u //undo
+C-_ //as same as C-u but it is easier to type several times in a row.
+
+<-------------FILE------------->
+C-x C-f //find a file
+
+C-x C-s //save the file
+
+C-x C-c //quit,save each changed file before it kill emacs.
+
+<-------------BUFFERS------------>
+C-x C-b //list buffers
+
+C-x b //switch buffer, C-x C-b to look at the buffer list.Then type C-x b <buffername> <Return> to switch buffer 
+
+C-x s //save some buffers ,it will ask you about each buffer which contains changes that you have not saved.
+
+<-------------EXTENDING THE COMMAND SET------------->
+C-x //character extend.followed by one character
+M-x //Named command extend.followed by a long name
+
+<-------------AUTO SAVE------------>
+#filename# //the auto file name has a # at the bebinning and the end
+
+M-X recover-file <Return> //recover the auto-save file data
+
+<-----------AUTO FILL MODE----------->
+M-x auto-fill-mode <Return> //emacs breaks the line in between words automatically whenever you insert text and make a line that too wide 
+
+C-x f //the auto-fill-mode's margin us usually set at 70 character,we can change it like this : C-u 20 C-x f
+
+M-q //re-fill the paragraph
+
+<---------------SEARCHING------------->
+C-s //forward search,it is incremental search,type C-s again it searches next occurrence of word
+
+C-r //reverse search
+
+<---------------MUTIPLE WINDOWS-------------->
+C-x 2 //splits the screen into two windows.both windows show the same thing
+
+C-M-v //scroll the other window 
+
+C-x o //o means other,move the cursor to another window
+
+<-------------MUTIPLE FRAMES-------------->
+M-x make-frame <Return> //make a new frame
+M-x delete-frame <Return> //remove the selected frame
+
+<------------HELP--------------->
+C-h   F1    M-x help <Return> //help
+C-h c //display a very brief description of the command
+C-h k //display the documentation of function
+C-h f //describe a function
+C-h a //type in a keyword and emacs will list all the commands whose names contain that keyword

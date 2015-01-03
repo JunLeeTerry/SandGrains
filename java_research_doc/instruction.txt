@@ -1,0 +1,58 @@
+Syntax:
+
+label:  instruction.suffix [operand0, ...] [flag0, ...]]
+
+1. instruction is a unique name for every operation
+2. suffix is a valid integer
+3. operands and flags are seperated by comma
+
+example:
+; This is a comment
+wait_here:
+	addi	r0, #1   ; add r0 and 1 and store the result to r0
+	jmp	wait_here
+	nop
+	nop
+
+5. Special symbols:
+   prefix	Description		Example
+   r		core register		r0, r11
+   a		core acumulator reg	a0, a3
+   spar		SPU  reg		spar1
+   cpar   	CPU  reg		cpar0
+   cr		control reg		cr100
+
+6. indirect access, example
+   load	   	r1, [r0]	; load from address in r0 to r1
+
+7. Constants
+   Predefined constants are all uppercase words
+   ldli	        r1, VALUE
+
+8. Derivatives
+   .org arg
+   .align arg
+   .skip arg
+   .code arg
+   .text arg
+   .data arg
+   .w arg
+   .dw arg
+   ... to be continued
+
+9. Macros
+   #include ...
+   #define ...
+   #if ... #else ... #end
+
+10. Scope
+    { ...... }
+    
+11. Instructions
+    abs, add, addc, addi, sub, subc, div, cmp, cpi
+    and, or, xor, not, ash, ashi, lsh, lshi, ror, rol, clz, nop
+    break, jmp, call, ret, idle, wait, loop, loopi
+    move, setlo, sethi, load, store, in, inr, out, outr
+    
+12. to be continued ... ... 
+

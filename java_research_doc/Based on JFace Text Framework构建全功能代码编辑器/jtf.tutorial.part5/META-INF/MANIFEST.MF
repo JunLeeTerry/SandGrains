@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JTF Tutorial Part5 Plug-in
+Bundle-SymbolicName: jtf.tutorial.part5;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Activator: jtf.tutorial.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jface.text,
+ org.eclipse.ui.editors
+Eclipse-LazyStart: true
+Bundle-ClassPath: lib/antlr-2.7.7.jar,
+ lib/antlr-3.0.1.jar,
+ lib/stringtemplate-3.1b1.jar,
+ .

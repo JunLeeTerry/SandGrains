@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            label="JTF Action Set"
+            visible="true"
+            id="jtf.tutorial.part5.actionSet">
+         <menu
+               label="JFace Text Framework Tutorial"
+               id="jtfMenu">
+            <separator
+                  name="jtfGroup">
+            </separator>
+         </menu>
+         <action
+               label="JTF Dialog"
+               icon="icons/sample.gif"
+               class="jtf.tutorial.actions.JTFAction"
+               tooltip="JTF Tutorial Part 5"
+               menubarPath="jtfMenu/jtfGroup"
+               toolbarPath="jtfGroup"
+               id="jtf.tutorial.part5.actions.JTFAction">
+         </action>
+      </actionSet>
+   </extension>
+
+</plugin>

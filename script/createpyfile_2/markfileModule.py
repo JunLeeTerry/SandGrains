@@ -2,26 +2,29 @@
 
 import time
 import os
-def main():
-    filename = raw_input("please input your filename:")
-    name = "autor: Jun Lee"
-    description = raw_input("please input your description:")
+
+def mark(filename,name):
     date = time.strftime("%d/%m/%y")
     print name,filename,date
     markfile = file(filename,"a+")
     length = max(len(name),len(filename),len(date))*3/2
-    
-    marklist = ["#"*length,forstr(length,name),forstr(length,date),"#"*length]
+        
+    marklist = ["#"*length,__forstr(length,name),__forstr(length,date),"#"*length]
     for i in marklist:
         markfile.write(i+"\n")
-        
+    
     markfile.close()
         
-#formatstring,make the string has same length as ### line
-def forstr(length,string):
+def __forstr(length,string):
+    '''
+    formate string
+    make the string has same length as ### line
+    '''
     #lenth of space
     spacelen = length - len(string) -3
     return "# "+string+" "*spacelen + "#"
 
-if (__name__ == "__main__"):
-    main()
+#filename = raw_input("filename:")
+#name = raw_input("name:")
+#mark(filename,name)
+

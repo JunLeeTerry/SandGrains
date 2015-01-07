@@ -13,3 +13,4 @@
 <structural>
 	Adapter
 	Bridge		
+	Filter

@@ -10,7 +10,20 @@
 	Builder
 	Prototype
 
-<structural>
+<structural design pattern>
 	Adapter
 	Bridge		
 	Filter
+	Composite
+	Decorator
+	Facade
+	Flyweight(享元)
+	Proxy
+
+<behavioral design pattern>
+	Chain of Responsibility
+	Command
+	Interpreter
+	Iterator
+	Mediator
+	Memento

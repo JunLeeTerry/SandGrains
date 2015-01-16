@@ -27,3 +27,4 @@
 	Iterator
 	Mediator
 	Memento
+	Observer

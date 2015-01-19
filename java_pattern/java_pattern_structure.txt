@@ -28,3 +28,18 @@
 	Mediator
 	Memento
 	Observer
+	State
+	Null Object
+	Strategy
+	Template
+	Visitor
+
+<other>
+	MVC
+	Business Delegate
+	Composite Entity
+	Data Access Object
+	Front Controller
+	Intercepting Filter Pattern
+	Service Locator Pattern
+	Transfer Object

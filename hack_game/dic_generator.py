@@ -1,16 +1,22 @@
 #!/usr/bin/env python
 
-lower = int(raw_input("length lower limit:"))
-upper = int(raw_input("length upper limit:"))
+import itertools
 
-def returnChar():
-    for i in range(32,127):
-        return chr(int(i))
-        
-print str(returnChar())*3
+'''#<----------------------------------
+list = []
+letters = [chr(i) for i in range(32,127)]
+for j in letters:
+    list.append(j)
+letter = "".join(list) 
+#----------------------------------->
+'''
+letter = str(raw_input("S >>>"))
+length = int(raw_input("L >>>"))
 
+res = itertools.product(letter,repeat=length)
 
+file = file("password.txt","a+")
 
-    
-        
+for i in res:
+    file.write(''.join(i)+"\n")
     

@@ -1,0 +1,60 @@
+# Nmap 5.21 scan initiated Tue Jan 20 14:49:20 2015 as: nmap -T4 -F -o nmapoutput 10.168.10.* 
+Nmap scan report for 10.168.10.1
+Host is up (0.0065s latency).
+Not shown: 98 closed ports
+PORT      STATE SERVICE
+80/tcp    open  http
+49152/tcp open  unknown
+
+Nmap scan report for 10.168.10.3
+Host is up (0.026s latency).
+Not shown: 91 closed ports
+PORT      STATE SERVICE
+135/tcp   open  msrpc
+139/tcp   open  netbios-ssn
+445/tcp   open  microsoft-ds
+49152/tcp open  unknown
+49153/tcp open  unknown
+49154/tcp open  unknown
+49155/tcp open  unknown
+49156/tcp open  unknown
+49157/tcp open  unknown
+
+Nmap scan report for 10.168.10.7
+Host is up (0.024s latency).
+All 100 scanned ports on 10.168.10.7 are closed
+
+Nmap scan report for 10.168.10.8
+Host is up (0.011s latency).
+All 100 scanned ports on 10.168.10.8 are closed
+
+Nmap scan report for 10.168.10.9
+Host is up (0.015s latency).
+All 100 scanned ports on 10.168.10.9 are closed
+
+Nmap scan report for 10.168.10.10
+Host is up (0.033s latency).
+All 100 scanned ports on 10.168.10.10 are closed (50) or filtered (50)
+
+Nmap scan report for 10.168.10.13
+Host is up (0.014s latency).
+All 100 scanned ports on 10.168.10.13 are closed
+
+Nmap scan report for 10.168.10.15
+Host is up (0.00027s latency).
+Not shown: 98 closed ports
+PORT   STATE SERVICE
+22/tcp open  ssh
+80/tcp open  http
+
+Nmap scan report for 10.168.10.21
+Host is up (0.027s latency).
+All 100 scanned ports on 10.168.10.21 are closed (50) or filtered (50)
+
+Nmap scan report for 10.168.10.26
+Host is up (0.027s latency).
+Not shown: 99 closed ports
+PORT   STATE SERVICE
+22/tcp open  ssh
+
+# Nmap done at Tue Jan 20 14:49:34 2015 -- 256 IP addresses (10 hosts up) scanned in 14.00 seconds

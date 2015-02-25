@@ -1,0 +1,9 @@
+1.why must set NAT after router forward?
+    
+    sudo iptables -t nat -A POSTROUTING -j MASQUERADE
+    
+    research linux command - iptables
+
+2.how to change their home page to 'terryblog' who connect to my wifi?
+
+ 

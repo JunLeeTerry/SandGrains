@@ -1,0 +1,138 @@
+编辑器
+	我们已经看到插件如何将编辑器放入工作台的，但是我们还没有看过一个编辑器的实现。
+	编辑器没有一种“典型的”实现模式，因为编辑器通常提供应用程序特定的语义。用来编辑和管理一个特定内容类型的工具会提供定制的行为对代表资源的数据进行操作。
+	编辑器可以是任何大小任何形状的，如果一个插件编辑器是基于文本的，那么编辑器可以使用现有的默认文本编辑器，或者创建一个定制的文本编辑器。java示例的编辑器就是用的后一种方法。
+	如果一个插件编辑器不是基于文本的话，那么定制的编辑器一定要被插件实现。有几种构建定制编辑器的方法，所有的方法都是取决于编辑器的行为和外观。
+	基于表格的编辑器可以让布局控件变成接近于向导或者是对话框的样式。插件开发环境（PDE）用这种方法来构建他的清单编辑器。
+	图形密集型编辑器，可以使用SWT等级的代码来编写。比如说，一个编辑器可以创建它自己的SWT窗口用来展现信息，或者是它可以针对应用来使用定制的SWT控件。
+	面向列表的编辑器可以使用Jface表、树和表的视图窗来操作数据。
+	一旦编辑器的实现模型已经确认了。实现编辑器的过程更像是开发一个独立的JFace或者是SWT应用的过程。平台的扩展被用来添加支持编辑器需要的行为，喜好，向导。但是编辑器内部在很大程度上取决于你的应用设计的原则和它的内部模型。
+	
+	工作台编辑器
+	虽然一个平台编辑器的实现是由你的插件和你想要编辑的内容来制定的，但是工作台提供了一种通用的结构用来构建一个编辑器。下面的概念适用于所有的工作台编辑器。
+	编辑器部分和他们的输入
+	一个编辑器必须实现IEditorPart并且通常是通过扩展EditorPart类来构建的。一个编辑器在自己的createPartControl方法中实现用户接口（ui）。这个方法是用来组装呈现编辑器内容的SWT控件或者是JFace视窗。
+	编辑器的输入就是要被编辑的东西的一种描述。你可以把编辑器输入想象成是一个文件名，虽然他要更普遍一些。IeditorInput 定义了编辑器输入的协议，包括输入的名字和用来代表编辑器顶端标签的图像。
+	平台提供了三个通用编辑器输入。IFileEditorInput代表文件系统中的文件输入。IURIEditorInput代表基于URI的输入。IStorageEditorInput代表字节流的输入。这些字节流可能来自于文件系统之外的源。
+	重置编辑器输入
+	如果你的编辑器可以支持在高速传输的时候，更换编辑器输入对象，那么你应该实现IReusableEditor。实现这个接口允许你的工作台“再循环”你的编辑器。工作台用户偏好允许用户决定在打开一定数量的编辑器之后编辑器应该被重用。
+	编辑器输入导航
+	如果你想要在你的编辑器中实现实现历史导航，那么你就应该实现INavigationLocation。它提供了一种机制，工作台请求现在的导航位置（INavigationLocation），这是保持一个导航历史的所需要的。工作台处理导航用户接口的这种机制。当编辑器需要恢复编辑器到INavigationLacation所代表的位置，你的INavigationLocation将会被通知。
+	你的编辑器剩下的实现部分取决于你想要展现的内容。我们会在接下来的内容中最普遍的编辑器类型—文本编辑器。
+	文本编辑器和平台文本
+	平台文本设备是用来实现工作台的默认文本编辑器的。文本编辑的接口是在ITextEditor中作为IEditorPart的一个文本的指定扩展定义的。
+	在平台中ITextEditor的实现在层次中是被结构化的。AbstractTextEditor是框架中的核心类，为了扩展编辑器从而支持编辑文本的源代码风格。这个框架是在org.eclipse.ui.texteditor中被定义的。
+	具体实现类TextEditor定义了标准平台文本编辑器的行为。它在org.eclipse.ui.editors.text中被定义。
+	文本编辑器框架提供了支持以下功能的模型独立的编辑器。
+	文本的展示和用户的修改。
+	标准文本编辑操作像是 剪切、复制、粘贴，查找、替换。
+	支持弹出和下拉菜单。
+	标尺中文本注释的视觉呈现或者像是文本中的波浪线。
+	在用户编辑文本的时候自动更新注释。
+	额外信息的展示，比如说行号。
+	语法高亮。
+	内容提示。
+	展现文本层次结构的文本大纲视图页。
+	在标尺和文本上的悬停支持。
+	上下文绑定按键。
+	偏好处理。
+	通过学习org.eclipse.ui.examples.javaeditor例子我们将会展现这些功能是如何被实现的。这个例子将展示像文本高亮，悬停帮助，和自动缩进这些复杂的功能是如何被实现的。
+	文档和分区（partitioner）
+	平台文本框架定义为文本定义了一个文档模型，并且提供了一个用这个模型展现文本的视图。我们将会从java 编辑器例子来看它是怎么样使用这个模型的。我们不会专注于注册一个编辑器扩展的基本机制，因为我们在org.eclipse.ui.editors中已经看到了关于这部分的讨论。相反我们将看看示例中的编辑器的类中具体的实现细节。
+	文档提供者和文档
+	在工作台中。当用户选择一个域元素（像是一个文件或者是一个储存在存档文件中的一个元素）编辑器会被打开。当一个编辑器被创建的时候，这就和一个编辑器输入（EditorInput）关联起来了。这个编辑器输入是用来描述对象正在被编辑。
+	当用户打开一个扩展名是.jav的文件的时候，这个java 编辑器示例就被打开了。在这种情况下这个编辑器的输入就是一个IFileEditorInput。平台文本编辑器对于编辑器输入本身承担很少。它使用过一个表现模型来工作的，叫做IDocument，是输入，这使他能有效的显示和操作文本。
+	这意味着必须有一种从期望的域模型（编辑器的输入）到表现模型的映射。这个映射被定义在了IDocumentProvider。文档提供者返回一个合适的IDecument，给定一个编辑器输入。
+	Java编辑器示例继承了被org.eclipse.ui.editors插件定义的TextFileDocumentProvider类。
+org.eclipse.ui.editors.documentProviders扩展是用来定义编辑器输入类型（或文件扩展）和一个文档提供者之间的映射。编辑器插件用下面的代码定义了一个文档提供者：
+   <extension
+         point="org.eclipse.ui.editors.documentProviders">
+      <provider	
+            class="org.eclipse.ui.editors.text.TextFileDocumentProvider"
+            inputTypes="org.eclipse.ui.IStorageEditorInput"
+            id="org.eclipse.ui.editors.text.StorageDocumentProvider">
+      </provider>
+   </extension>
+这个扩展点允许插件注册文档提供者并且用文件扩展名或者是一个编辑器输入类来关联他们。由于java编辑器示例没有定义他自己的文档提供者扩展，它继承的是IStorageEditorInput所有文件指定的通用的文档提供者。当一个用户打开一个文件编辑的时候，平台管理创建适当的文档提供者实例的细节。如果一个指定的文档提供者被注册了文件扩展，那么只有一个会被使用。如果没有给文档提供者指定文件扩展，则这个编辑器输入类型会被用来找到合适的文档提供者。
+	通过使用通用平台的文档提供者，java 编辑器示例可以采用文档提供者的所有优点，像是文件缓存和其他一些优点。
+	文档设置
+	由于java编辑器使用的是平台文本文档提供者。他如何能支持处理java文件的任何特殊行为呢。
+	org.eclipse.core.filebuffers.documentSetup扩展是用来定义文件扩展和IDocumentSetupParticipate之间的映射的。一旦任何特殊的功能被提供给编辑器，设置参与者会用他们来设置文档。
+<extension
+	id="ExampleJavaDocumentSetupParticipant"
+	name="%documentSetupParticipantName"
+	point="org.eclipse.core.filebuffers.documentSetup">
+	<participant
+		extensions="jav"
+		class="org.eclipse.ui.examples.javaeditor.JavaDocumentSetupParticipant">
+	</participant>
+</extension>
+	这个扩展的定义是给例子一个机会来为用于java特定任务的文档设置的机会，那么究竟JavaDocumentSetupParticipant做了些什么呢。我们将来看一下setup方法的简化版本。
+	public void setup(IDocument document) {
+		...	
+		IDocumentPartitioner partitioner= new FastPartitioner(JavaEditorExamplePlugin.getDefault().getJavaPartitionScanner(), JavaPartitionScanner.JAVA_PARTITION_TYPES);
+		partitioner.connect(document);
+		...
+	}
+这个设置代码配置一个叫做分割器（partitioner）的对象。
+	分区
+	这个分割器（IDocumentPartitioner）负责将文档分成叫做分区的非重叠的块。分区（由ITypeRegion代表）对于用高亮或者是格式化这样的不同的功能，有区别的对待文档的不同部分是很有用的。
+	在java编辑器这个例子中，文档被分为代表javadoc注释，多行注释，和其他一些东西这样几个分区。每个部分被分配一个内容类型并在文档中给定一个分区。分区随着用户的编辑文本更新。
+	基于文档更新的规则
+	这是取决于每一个编辑器来决定文档分区合适的实现方法。支持是由为基于规则的文档扫描的org.eclipse.jface.text.rules提供的。使用基于规则的扫描器允许编辑器使用由框架提供的FastPartitioner类
+IDocumentPartitioner partitioner= new FastPartitioner(JavaEditorExamplePlugin.getDefault().getJavaPartitionScanner(), JavaPartitionScanner.JAVA_PARTITION_TYPES);
+	RuleBasedPartitionScanner 是基于规则的扫描器的超类，子类是负责列举和实现区分像线分割符，空格，和通用模式的一些记号的规则。这个例子中的JavaPartitionScanner定义的规则是用来区分单行注释，字符常量，javadoc，多行注释和文字的。这是一个完成了的扫描器的构造函数。
+public JavaPartitionScanner() {
+	super();
+	IToken javaDoc= new Token(JAVA_DOC);
+	IToken comment= new Token(JAVA_MULTILINE_COMMENT);
+
+	List rules= new ArrayList();
+	// Add rule for single line comments.
+	rules.add(new EndOfLineRule("//", Token.UNDEFINED)); 
+
+	// Add rule for strings and character constants.
+	rules.add(new SingleLineRule("\"", "\"", Token.UNDEFINED, '\\')); 
+	rules.add(new SingleLineRule("'", "'", Token.UNDEFINED, '\\')); 
+
+	// Add special case word rule.
+	rules.add(new WordPredicateRule(comment));
+
+	// Add rules for multi-line comments and javadoc.
+	rules.add(new MultiLineRule("/**", "*/", javaDoc, (char) 0, true)); 
+	rules.add(new MultiLineRule("/*", "*/", comment, (char) 0, true)); 
+
+	IPredicateRule[] result= new IPredicateRule[rules.size()];
+	rules.toArray(result);
+	setPredicateRules(result);
+}
+
+	参阅org.eclipse.jface.text.rules中的类以获得有关于定义规则和可获得的规则类型更多的细节。刚我们看到语法高亮的时候我们会再次看到这个扫描仪。
+	平台插件开发向导>开发人员向导>编辑器
+	源查看器（viewer）和注释
+	编辑器和他相关的文本查看器主要负责文档展现和需要的帮助类的实现（查阅查看器，如果你不熟悉查看器的概念）。
+	一个TextViewer处理的所有文档模型映射的低等级的细节并且他分区到用户看到的被高亮或者是被格式化的文本。对于一个源代码风格编辑器来说，SourceViewer是被提供的一个源查看器会向用户介绍源代码注释的概念。这些注释可以是展现在垂直标尺上的文字，在文本右侧的概述标尺，或者是在文本下方着色的曲线。
+	SourceViewer和他的帮助类被用于整个AbstractTextEditor层次。org.eclipse.jface.text.source包定义了这个查看器和支持注释呈现的其他类。
+	注释和标尺
+	注释，就像分区，在很大程度上取决于被编辑的文档的类型。IAnnotationModel是用来为一个文档保存批注，列举他们的请求，并侦听文本的变化，以保持注释最新的内容。注释模型在org.eclipse.core.filebuffers.annoatationModelCreation扩展中被注册。这个扩展点允许插件注册类，这个类会创建给定文件扩展名的标注模型。Java编辑器示例没有使用这个扩展点，所以他继承平台定义的注释模型
+<extension
+	point="org.eclipse.core.filebuffers.annotationModelCreation">
+	<factory
+		extensions="*"
+		class="org.eclipse.ui.texteditor.ResourceMarkerAnnotationModelFactory">
+	</factory>
+</extension>
+	提供的工厂类会为带有任意扩展的文件创建一个ResourceMarkerAnnotationModel。这个来显示代表工作区中资源的标记的注释。（请参阅资源标记以获得标记的更多信息）它为每一个标记分配一个图像和描述，并且监视他的资源中变化的标记。
+	要查看注释模型是如何在文本编辑器中展现的，我们将研究平台文本编辑器，他是如何使用规则和注释的。不同的注释如何被显示在规则和文本中可以被用户控制 在常规>编辑>文本编辑器>注释首选项。
+	垂直标尺
+	在编辑区域左边的垂直标尺是被平台文本编辑器用来显示相邻他们的文本行的文本范围和基于行的注解。
+	这些注解在ResourceMarkerAnnotationModel提供描述。当源查看器被编辑器初始化的时候这个模型被设置在SourceViewer中。下面的代码片段是从AbstractTextEditor中来的，显示了文档和观察器有关的注释模型。
+private void initializeSourceViewer(IEditorInput input) {
+		
+	IAnnotationModel           model= getDocumentProvider().getAnnotationModel(input);
+	IDocument document= getDocumentProvider().getDocument(input);
+		
+	if (document != null) {
+		fSourceViewer.setDocument(document, model);
+		...
+

@@ -1,0 +1,213 @@
+外文文献资料
+
+收集：苏州大学 文正学院  11计算机班（学号1117404043）李俊
+
+Editors
+We have seen how plug-ins can contribute an editor to the workbench, but we haven't yet looked at the implementation of an editor.
+There is no "typical" implementation pattern for an editor, because editors usually provide application-specific semantics.  A tool that edits and manages a particular content type will provide customized behavior for manipulating the data represented by the resource.
+Editors can come in all shapes and sizes.  If a plug-in's editor is text-based, then the editor can either use the existing default text editor, or create a customized text editor by using the facilities provided in the platform.  The latter approach is used by the Java example editor.
+
+If a plug-in's editor is not text based, then a custom editor must be implemented by the plug-in. There are several approaches for building custom editors, all of which depend on the look and behavior of the editor.
+Form-based editors can layout controls in a fashion similar to a dialog or wizard.  The Plug-in Development Environment (PDE) uses this approach in building its manifest editors.  
+Graphics intensive editors can be written using SWT level code.  For example, an editor could create its own SWT window for displaying the information, or it could use a custom SWT control that is optimized for the application.
+List-oriented editors can use JFace list, tree, and table viewers to manipulate their data.
+Once the implementation model for the editor has been determined, implementing the editor is much like programming a stand-alone JFace or SWT application.  Platform extensions are used to add actions, preferences, and wizards needed to support the editor.  But the internals of the editor are largely dependent on your application design principles and internal model.
+
+Workbench editors
+Although the implementation of a workbench editor will be specific to your plug-in and the content that you want to edit, the workbench provides a general structure for building an editor. The following concepts apply to all workbench editors.
+Editor parts and their inputs
+An editor must implement IEditorPart and is often built by extending the EditorPart class.  An editor implements its user interface in the createPartControl method.  This method is used to assemble the SWT widgets or JFace viewers that present the editor contents. 
+An editor input is a description of something to be edited. You can think of an editor input as a file name, though it is more general. IEditorInput defines the protocol for an editor input, including the name of the input and the image that should be used to represent it in the labels at the top of the editor.
+Three generic editor inputs are provided in the platform. IFileEditorInput represents an input that is a file in the file system, and IURIEditorInput represents an input based on a URI.  IStorageEditorInput represents an input that is a stream of bytes. These bytes may come from sources other than the file system.
+Resetting the editor input
+If your editor can support the replacement of the editor's input object on the fly, you should implement IReusableEditor. Implementing this interface allows the workbench to "recycle" your editor.  Workbench user preferences allow the user to dictate that editors should be reused after a certain number of them are open.
+Navigating the editor input 
+If you want to implement a navigation history in your editor, you should implementINavigationLocationProvider.  This provides a mechanism for the workbench to request a current navigation location (INavigationLocation) as needed to keep a navigation history.  The workbench handles the mechanics of the navigation user interface.  Your INavigationLocation will be notified when it needs to restore the editor to the location that it represents.
+The rest of your editor's implementation depends on the content that you are trying to present.  We'll look next at the most common type of editor - the text editor.
+Text editors and platform text
+The platform text facility is used to implement the default text editor for the workbench.  The interface for text editing is defined in ITextEditor as a text specific extension of IEditorPart.  
+The implementation of ITextEditor in the platform is structured in layers.  AbstractTextEditor is the core class of the framework for extending the editor to support source code style editing of text.  This framework is defined in org.eclipse.ui.texteditor.
+The concrete implementation class TextEditor defines the behavior for the standard platform text editor.  It is defined in the package org.eclipse.ui.editors.text.
+The text editor framework provides a model-independent editor that supports the following features:
+presentation and user modification of text
+standard text editing operations such as cut/copy/paste, find/replace
+support for context and pulldown menus
+visual presentation of text annotations in rulers or as squigglies in the text
+automatic update of annotations as the user edits text
+presentation of additional information such as line numbers
+syntax highlighting
+content assist
+text outlining pages that show the hierarchical structure of the text
+context sensitive behavior
+hover support over rulers and text
+key binding contexts
+preference handling
+We will explore how these features can be implemented in an editor by studying theorg.eclipse.ui.examples.javaeditor example.  This example shows how complex features like text coloring, hover help, and automatic indenting can be implemented. 
+In discussing these features we will be moving between the abstract framework, the platform editor TextEditor, and the example's subclass, JavaEditor.
+Documents and partitions
+The platform text framework defines a document model for text and provides a viewer that displays text using this model. We will start by looking at the Java editor example and how it uses this model.  We will not focus on the basic mechanics of registering an editor extension, since we've already seen this in the section discussingorg.eclipse.ui.editors.  Instead, we'll look at the specifics of how the editor class is implemented in the example.
+Document providers and documents
+In the workbench, an editor is typically opened when the user selects a domain element (such as a file or an element stored inside an archive file) and opens it.  When the editor is created, it is associated with an editor input (IEditorInput), which describes the object being edited.
+The Java editor example opens when the user opens a file with the "*.jav" extension.  In this case, the input to the editor is an IFileEditorInput.  The platform text framework assumes little about the editor input itself.  It works with a presentation model, called an IDocument, for the input, so that it can effectively display and manipulate text.
+This means that there must be a way to map from an expected domain model (the editor input) to the presentation model.  This mapping is defined in an IDocumentProvider.  Given an editor input, the document provider returns an appropriate IDocument.
+The	Java	editor	example	inherits the TextFileDocumentProvider defined by he plug-in org.eclipse.ui.editors. The extension org.eclipse.ui.editors.documentProviders is used to define mappings between editor input types (or file extensions) and document providers. The editors plug-in defines its document provider as follows:
+   <extension
+         point="org.eclipse.ui.editors.documentProviders">
+      <provider
+            class="org.eclipse.ui.editors.text.TextFileDocumentProvider"
+            inputTypes="org.eclipse.ui.IStorageEditorInput"
+            id="org.eclipse.ui.editors.text.StorageDocumentProvider">
+      </provider>
+   </extension>
+This extension point allows plug-ins to register document providers and associate them with either a file extension or an editor input class. Since the Java editor example does not define its own document provider extension, it inherits the generic document provider specified for all input types that are IStorageEditorInput. When the user opens a file for editing, the platform manages the details of creating the proper document provider instance. If a specific document provider is registered for the file extension, that one will be used. If there is no specific document provider for the file extension, then the editor input type will be used to find the appropriate provider.
+By using the generic platform document provider, the Java editor example can take advantage of all of the features of the document provider, such as file buffering and other optimizations.
+Document setup
+Since the Java editor uses the platform text document provider, how can it supply any specialized behavior for handling Java files?
+The extension org.eclipse.core.filebuffers.documentSetup is used to define mappings between file extensions and an IDocumentSetupParticipant. The setup participant will set up the document with any special features once it has been provided to the editor.
+<extension
+	id="ExampleJavaDocumentSetupParticipant"
+	name="%documentSetupParticipantName"
+	point="org.eclipse.core.filebuffers.documentSetup">
+	<participant
+		extensions="jav"
+		class="org.eclipse.ui.examples.javaeditor.JavaDocumentSetupParticipant">
+	</participant>
+</extension>
+This extension definition is what gives the example a chance to setup the document for Java specific tasks. So what does JavaDocumentSetupParticipant do? We'll look at a simplified version of the setup method.
+ 	public void setup(IDocument document) {
+		...
+		IDocumentPartitioner partitioner= new FastPartitioner(JavaEditorExamplePlugin.getDefault().getJavaPartitionScanner(), JavaPartitionScanner.JAVA_PARTITION_TYPES);
+		partitioner.connect(document);
+		...
+	}
+The setup code configures an object called a partitioner.
+Partitions
+The partitioner (IDocumentPartitioner) is responsible for dividing the document into non-overlapping regions called partitions.  Partitions (represented by ITypedRegion) are useful for treating different sections of the document differently with respect to features like syntax highlighting or formatting.
+In the case of the Java editor example, the document is divided into partitions that represent the javadoc comments, multi line comments, and everything else.  Each region is assigned a content type and its position in the document.  Positions are updated as the user edits text.
+Rule based document partitioning
+It is up to each editor to determine the appropriate implementation for a document partitioner.  Support is provided in org.eclipse.jface.text.rules for rule-based document scanning.  Using a rule-based scanner allows an editor to use the FastPartitioner provided by the framework.
+IDocumentPartitioner partitioner= new FastPartitioner(JavaEditorExamplePlugin.getDefault().getJavaPartitionScanner(), JavaPartitionScanner.JAVA_PARTITION_TYPES);
+RuleBasedPartitionScanner is the superclass for rule based scanners.  Subclasses are responsible for enumerating and implementing the rules that should be used to distinguish tokens such as line delimiters, white space, and generic patterns when scanning a document.  The example's JavaPartitionScanner defines rules for distinguishing single line comments, character constants, javadoc, multi line comments, and words.  This is done in the scanner's constructor:
+public JavaPartitionScanner() {
+	super();
+	IToken javaDoc= new Token(JAVA_DOC);
+	IToken comment= new Token(JAVA_MULTILINE_COMMENT);
+
+	List rules= new ArrayList();
+	// Add rule for single line comments.
+	rules.add(new EndOfLineRule("//", Token.UNDEFINED)); 
+
+	// Add rule for strings and character constants.
+	rules.add(new SingleLineRule("\"", "\"", Token.UNDEFINED, '\\')); 
+	rules.add(new SingleLineRule("'", "'", Token.UNDEFINED, '\\')); 
+
+	// Add special case word rule.
+	rules.add(new WordPredicateRule(comment));
+
+	// Add rules for multi-line comments and javadoc.
+	rules.add(new MultiLineRule("/**", "*/", javaDoc, (char) 0, true)); 
+	rules.add(new MultiLineRule("/*", "*/", comment, (char) 0, true)); 
+
+	IPredicateRule[] result= new IPredicateRule[rules.size()];
+	rules.toArray(result);
+	setPredicateRules(result);
+}
+See the classes in org.eclipse.jface.text.rules for more details about defining rules and the types of rules availables.  We'll look at the scanners again when we look at syntax coloring.
+Platform Plug-in Developer Guide > Programmer's Guide > Editors
+Source viewers and annotations
+The editor and its corresponding text viewer are largely responsible for the implementation of the document's presentation and the configuration of any needed helper classes.  (See Viewers if you are not familiar with the concept of a viewer.)  
+A TextViewer handles all of the low level details of mapping the document model and its partitions into the colored and formatted text that a user sees.  For source code style editors, a SourceViewer is provided.  A source viewer introduces the notion of source code annotations.  These annotations can be shown in a vertical ruler on the left side of the text, an overview ruler on the right side of the text, or as colored squigglies underneath text.
+SourceViewer and its helper classes are used throughout the AbstractTextEditor hierarchy.  The packageorg.eclipse.jface.text.source defines this viewer and the other classes supporting annotation presentation.
+Annotations and rulers
+Annotations, like partitions, are largely dependent on the kind of document being edited. The IAnnotationModelfor a document is what holds the annotations, enumerates them on request, and listens for text changes in order to keep the annotations up to date with the text. Annotation models are registered in theorg.eclipse.core.filebuffers.annotationModelCreation extension. This extension point allows plug-ins to register a class that will create an annotation model appropriate for a given file extension. The Java Editor example does not use this extension point, so it inherits the annotation model defined by the platform.
+<extension
+	point="org.eclipse.core.filebuffers.annotationModelCreation">
+	<factory
+		extensions="*"
+		class="org.eclipse.ui.texteditor.ResourceMarkerAnnotationModelFactory">
+	</factory>
+</extension>
+The supplied factory class will create a ResourceMarkerAnnotationModel for files with any extension. This class displays annotations that represent a marker on a resource in the workspace.  (See Resource markers for more information on markers.)  It assigns an image and description to each marker and monitors its resource for changes in the markers.
+To see how an annotation model is displayed in a text editor, we'll examine the platform text editor and its use of rulers and annotations.  The specifics of how different annotations are shown in the rulers and text can be controlled by the user in the   General > Editors > Text Editors > Annotations preferences.
+Vertical ruler
+A vertical ruler to the left of the editing area is used by platform text editors to show text ranges and line-based annotations adjacent to their text line.
+
+These annotations are described in the supplied ResourceMarkerAnnotationModel.  This model is set into theSourceViewer when the source viewer is initialized by the editor.  The following snippet fromAbstractTextEditor shows how the document and the annotation model are associated with the viewer.
+private void initializeSourceViewer(IEditorInput input) {
+		
+	IAnnotationModel           model= getDocumentProvider().getAnnotationModel(input);
+	IDocument document= getDocumentProvider().getDocument(input);
+		
+	if (document != null) {
+		fSourceViewer.setDocument(document, model);
+		...
+Once the source viewer is configured with the proper document and annotation model, it has enough information to present the document and ensure the correct annotations are shown in the vertical ruler to the left.  The model is associated with the ruler when the document is set.  The following snippet shows what happens when a document is set into the source viewer.  It has been simplified from the actual code in SourceViewer for clarity:
+public void setDocument(IDocument document, IAnnotationModel annotationModel) {
+	...
+	// create visual annotation model from the supplied model and store 
+	// in fVisualAnnotationModel
+	...
+	if (fVerticalRuler != null)
+		fVerticalRuler.setModel(fVisualAnnotationModel);
+In this way, the ruler is associated with the appropriate annotation model.  
+Let's look at the ruler itself.  It is created by the text editor and then connected with the editor's viewer.  Since the Java editor example does not define any special behavior for rulers, it inherits the ruler as defined in TextEditor.
+protected IVerticalRuler createVerticalRuler() {
+	CompositeRuler ruler= new CompositeRuler();
+	ruler.addDecorator(0, new AnnotationRulerColumn(VERTICAL_RULER_WIDTH));
+	if (isLineNumberRulerVisible())
+		ruler.addDecorator(1, createLineNumberRulerColumn());
+	return ruler;
+}
+The text editor uses a CompositeRuler. This ruler does not have a visual presentation of its own.  The presentation is provided by a list of decorators that show columns (IVerticalRulerColumn) in the ruler.  In this example, a ruler column that shows annotations (AnnotationRulerColumn) is always added, and a line number ruler column is added based on user preferences. The annotation ruler column handles the particulars of displaying the annotation images in the proper locations.
+Despite all the classes involved in showing a ruler, note that the example editor needed only to subclass framework classes to get ruler behavior.   JavaDocumentProvider inherits an appropriate marker annotation model from FileDocumentProvider.  The JavaTextEditor inherits the ruler presentation from TextEditor.
+Overview ruler
+An overview ruler on the right hand side of the editing area is used to show annotations concerning the entire document.  These annotations are shown relative to their position in the document and do not move as the user scrolls the document.  There usually is a corresponding annotation on the vertical ruler when that portion of the document is visible.  
+The vertical ruler below shows that there are two tasks in the document and one bookmark.  Since the bookmarked text is visible, its annotation is also shown on the left.
+ 
+The user can navigate to the location of the annotation in the code by clicking on the annotation itself.
+The types of annotations shown in the overview ruler are determined by adding annotation types to the ruler.  In the following snippet from SourceViewerDecorationSupport, annotation types are dynamically added to the ruler. (See next section for more information about SourceViewerDecorationSupport.)
+private void showAnnotationOverview(Object annotationType) {
+	if (fOverviewRuler != null) {
+		Color c= getAnnotationTypeColor(annotationType);
+		fOverviewRuler.setAnnotationTypeColor(annotationType, c);
+		int l= getAnnotationTypeLayer(annotationType);
+		fOverviewRuler.setAnnotationTypeLayer(annotationType, l);
+		fOverviewRuler.addAnnotationType(annotationType);
+		fOverviewRuler.update();
+	}
+}
+The overview ruler is also supplied with an IAnnotationAccess that is used to provide information about a particular annotation, such as its type and how it is to be displayed. The TextEditor uses aDefaultMarkerAnnotationAccess which interprets annotations according to their marker types and consults the user preferences to see which marker types should be shown in the overview ruler.
+protected IAnnotationAccess createAnnotationAccess() {
+	return new DefaultMarkerAnnotationAccess(fAnnotationPreferences);
+}
+Consult the implementation of DefaultMarkerAnnotationAccess and MarkerAnnotation for more detail about presenting markers in the overview ruler.
+Text annotations
+In addition to showing annotations in the rulers, a source viewer can show annotations as colored squiggly marks in the text.  
+
+We'll look again at the creation of the source viewer in AbstractDecoratedTextEditor.
+protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
+		
+	... 
+	ISourceViewer sourceViewer= new SourceViewer(parent, ruler, fOverviewRuler, isOverviewRulerVisible(), styles);
+	fSourceViewerDecorationSupport= new SourceViewerDecorationSupport(sourceViewer, fOverviewRuler, fAnnotationAccess, sharedColors);
+	configureSourceViewerDecorationSupport();
+		
+	return sourceViewer;
+}
+The class SourceViewerDecorationSupport handles many of the decorations shown in a source viewer, including text annotations, colored margins, colored cursor lines, and the like.  It is configured with the user preferences so that it can respond to dynamic updates of user preference changes.  Most editors need not be concerned with the details of how these decorations are painted.  (See SourceViewerDecorationSupport and related classes such as AnnotationPainter if you must!).  The important thing to know is what decorations are available so that the SourceViewer and its supporting SourceViewerDecorationSupport are configured correctly.
+Configuring a SourceViewerDecorationSupport
+Let's look at the configuration used by AbstractDecoratedTextEditor for the decoration support.
+protected void configureSourceViewerDecorationSupport() {
+
+	Iterator e= fAnnotationPreferences.getAnnotationPreferences().iterator();
+	while (e.hasNext())
+		fSourceViewerDecorationSupport.setAnnotationPreference((AnnotationPreference) e.next());
+	fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(DefaultMarkerAnnotationAccess.UNKNOWN, UNKNOWN_INDICATION_COLOR, UNKNOWN_INDICATION, UNKNOWN_INDICATION_IN_OVERVIEW_RULER, 0);
+		
+	fSourceViewerDecorationSupport.setCursorLinePainterPreferenceKeys(CURRENT_LINE, CURRENT_LINE_COLOR);
+	fSourceViewerDecorationSupport.setMarginPainterPreferenceKeys(PRINT_MARGIN, PRINT_MARGIN_COLOR, PRINT_MARGIN_COLUMN);
+	fSourceViewerDecorationSupport.setSymbolicFontName(getFontPropertyPreferenceKey());
+}
+Note that the annotation preferences are used to define annotation types for all of the annotations shown in the user preferences.  This includes annotations contributed by any plug-in and is not limited to the workbench-supplied annotations.  If you do not wish to show all available annotations in your editor, you should override this method and set up the SourceViewerDecorationSupport with only those types you want to show.
+
+

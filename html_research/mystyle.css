@@ -1,0 +1,30 @@
+#header{
+    border-radius:5px;
+    heigth:50px;
+    background-color:#4169e1;
+    margin-bottom:5px
+    clear:both;
+}
+#left{
+    border-radius:5px;
+    width:80px;
+    heigth:500px;
+    background-color:#eee8aa;
+    margin-right:5px;
+    float:left;
+}
+#right{
+    border-radius:5px;
+    width:300px
+    heigth:500px;
+    background-color:#c8c8c8;
+    margin-left:5px;
+    float:right;
+}
+#footer{
+    border-radius:5px;
+    heigth:20px;
+    background-color:#4169e1;
+    margin-top:10px;
+    clear:both;
+}

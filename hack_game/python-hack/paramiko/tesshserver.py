@@ -24,7 +24,7 @@ server = sys.argv[1]
 ssh_port = int(sys.argv[2])
 
 try:
-    sock = socket.socket(socket.AF_INET,socket.AF_STREAM)
+    sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
     sock.bind((server,sshport))
     sock.listen(100)

@@ -60,12 +60,12 @@ try:
                 raise Exception ('exit')
         except KeyboardInterrupt:
             session.close()
-    except Exception,e:
-        print "[-] Caught exception: " + str(e)
-        try:
-            session.close()
-        except:
-            pass
-        sys.exit(1)
+except Exception,e:
+    print "[-] Caught exception: " + str(e)
+    try:
+        session.close()
+    except:
+        pass
+    sys.exit(1)
 
                 

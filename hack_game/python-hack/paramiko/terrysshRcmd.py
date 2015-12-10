@@ -21,6 +21,6 @@ def ssh_command(ip,user,passwd,command):
         sessionclient.close()
         return 
 
-ip = raw_input("Please input the ip:").strip('\n')
-ssh_command(ip,'terry','123456','ClientConnected')
+
+ssh_command("192.168.1.106",'terry','123456','ClientConnected')
 

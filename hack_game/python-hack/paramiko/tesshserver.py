@@ -4,7 +4,7 @@ import threading
 import socket
 import sys
 
-hostkey = ""
+hostkey = paramiko.RSAKey(filename="test_rsa.key")
 
 class Server(paramiko.ServerInterface):
     def __init__(self):

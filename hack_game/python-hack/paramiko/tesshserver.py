@@ -40,11 +40,12 @@ try:
     session.add_server_key(hostkey)
     server = Server()
     try:
-        session.start_server(session=session)
+        session.start_server(server=server)
     except paramiko.SSHException,e:
         print "[-] SSH negotiation failed"
     chan = session.accept(20)
-    print "[+] Aurhenticated!"
+    print "[+] Authenticated!"
+    print chan
     print chan.recv(1024)
     chan.send("Welcome to bh_ssh")
     

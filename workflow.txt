@@ -1,0 +1,36 @@
+++++++++++++++  ---------------------->
+before working			      | 
+++++++++++++++			      |
+				      |
+1.    git checkout develop	      |
+2.    git pull	   		      |
+3.    git checkout develop_XX	      |
+4.    git merge --no-ff develop	      |
+5.    fix conflicts		      |
+				      |
++++++++++++++	 <---------------------
+start working 
++++++++++++++    --------------------->
+				      |
+				      |	
++++++++++++++    <---------------------
+after working
++++++++++++++   
+
+push develop_XX
+================================================
+1.    git add .
+2.    git commit -m "XX"
+3.    git push origin origin develop_XX
+================================================
+
+4.    git checkout develop
+5.    git merge --no-ff develop_XX
+6.    fix conflicts
+
+push develop
+===============================================
+7.    git add .
+8.    git commit -m "XX"
+9.    git push origin develop
+===============================================
